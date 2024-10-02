@@ -18,5 +18,7 @@ jobs:
         with:
           node-version: 18
           registry-url: 'https://registry.npmjs.org'
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
       - run: npm ci
       - run: npm run ${{ matrix.command }}
