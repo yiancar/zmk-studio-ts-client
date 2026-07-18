@@ -1,7 +1,6 @@
 import { ReadableStream, WritableStream } from 'web-streams-polyfill';
 import {
   call_rpc,
-  MetaError,
   Notification,
   Request,
   RequestResponse,
@@ -31,7 +30,7 @@ describe('call_rpc', () => {
       meta: { simpleError: ErrorConditions.GENERIC },
     });
 
-    await expect(call_rpc(conn, {})).rejects.toMatchObject<MetaError>({
+    await expect(call_rpc(conn, {})).rejects.toMatchObject({
       condition: ErrorConditions.GENERIC,
     });
   });
