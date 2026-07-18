@@ -5,7 +5,27 @@ import { RpcTransport } from './transport';
 
 import { Mutex } from 'async-mutex';
 import { ErrorConditions } from './meta';
+import { LightingTarget } from './lighting';
+import type {
+  Capabilities as LightingCapabilities,
+  Notification as LightingNotification,
+  Response as LightingResponse,
+  ScalarRange as LightingScalarRange,
+  Effect as LightingEffect,
+  State as LightingState,
+  TargetState as LightingTargetState,
+} from './lighting';
 export { Request, RequestResponse, Response, Notification };
+export { LightingTarget };
+export type {
+  LightingCapabilities,
+  LightingEffect,
+  LightingNotification,
+  LightingResponse,
+  LightingScalarRange,
+  LightingState,
+  LightingTargetState,
+};
 
 export interface RpcConnection {
   label: string;
@@ -126,10 +146,151 @@ export async function call_rpc(
 
     if (value.meta?.noResponse) {
       throw new NoResponseError();
-    } else if (value.meta?.simpleError) {
+    } else if (value.meta?.simpleError !== undefined) {
       throw new MetaError(value.meta.simpleError);
     }
 
     return value;
   });
+}
+
+export class UnexpectedLightingResponseError extends Error {
+  readonly operation: string;
+
+  constructor(operation: string) {
+    super(`Missing lighting response for ${operation}`);
+    this.operation = operation;
+    Object.setPrototypeOf(this, UnexpectedLightingResponseError.prototype);
+  }
+}
+
+function require_lighting_response(
+  response: RequestResponse,
+  operation: string
+): LightingResponse {
+  if (!response.lighting) {
+    throw new UnexpectedLightingResponseError(operation);
+  }
+
+  return response.lighting;
+}
+
+function require_lighting_value<T>(
+  value: T | undefined,
+  operation: string
+): T {
+  if (value === undefined) {
+    throw new UnexpectedLightingResponseError(operation);
+  }
+
+  return value;
+}
+
+export async function get_lighting_capabilities(
+  conn: RpcConnection,
+  target: LightingTarget
+): Promise<LightingCapabilities> {
+  const response = require_lighting_response(
+    await call_rpc(conn, {
+      lighting: { getCapabilities: { target } },
+    }),
+    'get capabilities'
+  );
+
+  return require_lighting_value(response.getCapabilities, 'get capabilities');
+}
+
+export async function try_get_lighting_capabilities(
+  conn: RpcConnection,
+  target: LightingTarget
+): Promise<LightingCapabilities | undefined> {
+  try {
+    return await get_lighting_capabilities(conn, target);
+  } catch (error) {
+    if (
+      error instanceof MetaError &&
+      error.condition === ErrorConditions.RPC_NOT_FOUND
+    ) {
+      return undefined;
+    }
+
+    throw error;
+  }
+}
+
+export async function get_lighting_state(
+  conn: RpcConnection,
+  target: LightingTarget
+): Promise<LightingTargetState> {
+  const response = require_lighting_response(
+    await call_rpc(conn, {
+      lighting: { getState: { target } },
+    }),
+    'get state'
+  );
+
+  return require_lighting_value(response.getState, 'get state');
+}
+
+export async function set_lighting_preview_state(
+  conn: RpcConnection,
+  target: LightingTarget,
+  state: LightingState
+): Promise<LightingTargetState> {
+  const response = require_lighting_response(
+    await call_rpc(conn, {
+      lighting: { setPreviewState: { target, state } },
+    }),
+    'set preview state'
+  );
+
+  return require_lighting_value(response.setPreviewState, 'set preview state');
+}
+
+export async function check_lighting_unsaved_changes(
+  conn: RpcConnection
+): Promise<boolean> {
+  const response = require_lighting_response(
+    await call_rpc(conn, {
+      lighting: { checkUnsavedChanges: true },
+    }),
+    'check unsaved changes'
+  );
+
+  return require_lighting_value(
+    response.checkUnsavedChanges,
+    'check unsaved changes'
+  );
+}
+
+export async function save_lighting_changes(
+  conn: RpcConnection
+): Promise<boolean> {
+  const response = require_lighting_response(
+    await call_rpc(conn, {
+      lighting: { saveChanges: true },
+    }),
+    'save changes'
+  );
+
+  return require_lighting_value(response.saveChanges, 'save changes');
+}
+
+export async function discard_lighting_changes(
+  conn: RpcConnection
+): Promise<LightingTargetState> {
+  const response = require_lighting_response(
+    await call_rpc(conn, {
+      lighting: { discardChanges: true },
+    }),
+    'discard changes'
+  );
+
+  return require_lighting_value(response.discardChanges, 'discard changes');
+}
+
+export function get_lighting_notification(
+  notification: Notification
+): LightingNotification | undefined {
+  return notification.lighting;
 }
