@@ -3,37 +3,43 @@ on:
     branches:
       - main
 
-permissions: {}
-
 name: release-please
 
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
     permissions:
       contents: write
+      issues: write
       pull-requests: write
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
         with:
-          token: ${{ secrets.ZMK_STUDIO_RELEASE_TOKEN }}
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
           release-type: node
-      - uses: actions/checkout@v4
-        if: ${{ steps.release.outputs.release_created }}
+
+  publish:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
         with:
           submodules: true
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 18
+          node-version: 24
           registry-url: 'https://registry.npmjs.org'
-        if: ${{ steps.release.outputs.release_created }}
+          package-manager-cache: false
       - name: Install Protoc
         uses: arduino/setup-protoc@v3
-        if: ${{ steps.release.outputs.release_created }}
       - run: npm ci
-        if: ${{ steps.release.outputs.release_created }}
+      - run: npm run typecheck
+      - run: npm test
       - run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.ZMK_STUDIO_NPM_TOKEN}}
-        if: ${{ steps.release.outputs.release_created }}

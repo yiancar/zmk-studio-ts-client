@@ -1,5 +1,5 @@
 {
-  "name": "@zmkfirmware/zmk-studio-ts-client",
+  "name": "@yiancar/zmk-studio-ts-client",
   "version": "0.0.18",
   "description": "RPC client library for interacting with ZMK Studio enabled keyboards",
   "type": "module",
@@ -33,7 +33,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zmkfirmware/zmk-studio-ts-client.git"
+    "url": "git+https://github.com/yiancar/zmk-studio-ts-client.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "license": "MIT",
   "author": {
@@ -51,9 +55,9 @@
     "mechanical-keyboards"
   ],
   "bugs": {
-    "url": "https://github.com/zmkfirmware/zmk-studio-ts-client/issues"
+    "url": "https://github.com/yiancar/zmk-studio-ts-client/issues"
   },
-  "homepage": "https://github.com/zmkfirmware/zmk#readme",
+  "homepage": "https://github.com/yiancar/zmk-studio-ts-client#readme",
   "dependencies": {
     "async-mutex": "^0.5.0",
     "protobufjs": "^7.3.2"
