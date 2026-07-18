@@ -1,5 +1,6 @@
 behaviors.ts
 core.ts
 keymap.ts
+lighting.ts
 meta.ts
 studio.ts
