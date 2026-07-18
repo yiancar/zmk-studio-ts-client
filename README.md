@@ -3,6 +3,10 @@
 Simple client library for the ZMK Studio RPC layer, with the message types generated directly from the ZMK Studio
 protocol buffer files.
 
+This fork is published as `@yiancar/zmk-studio-ts-client` and extends the
+upstream client with support for a modern, capability-driven RGB lighting
+subsystem.
+
 ## API
 
 The client exports the generated Studio message types, the low-level `call_rpc`
