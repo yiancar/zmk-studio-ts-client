@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0](https://github.com/yiancar/zmk-studio-ts-client/compare/v0.0.18...v0.1.0) (2026-07-18)
+
+
+### Features
+
+* add typed live lighting client ([770f124](https://github.com/yiancar/zmk-studio-ts-client/commit/770f124aedea40fe117fafb8ac6d5c5aa67c0069))
+
 ## [0.0.18](https://github.com/zmkfirmware/zmk-studio-ts-client/compare/v0.0.17...v0.0.18) (2024-10-03)
 
 
